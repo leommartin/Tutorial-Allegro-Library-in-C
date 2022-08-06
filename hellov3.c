@@ -3,7 +3,7 @@
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_image.h>
-
+#include <allegro5/allegro_primitives.h>
 
 // verifica rapidamente se cada etapa foi executado com êxito.
 void must_init(bool test, const char *description)
