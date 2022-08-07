@@ -3,6 +3,9 @@
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_primitives.h>
+// Bibliotecas adicionadas
+#include <allegro5/allegro_audio.h>
+#include <allegro5/allegro_acodec.h>
 
 void must_init(bool test, const char *description)
 {
@@ -16,7 +19,6 @@ int main()
 {
     must_init(al_init(), "allegro");
     must_init(al_install_keyboard(), "keyboard");
-    must_init(al_install_mouse(), "mouse");
 
     ALLEGRO_TIMER* timer = al_create_timer(1.0 / 30.0);
     must_init(timer, "timer");
@@ -35,34 +37,19 @@ int main()
     must_init(font, "font");
 
     must_init(al_init_primitives_addon(), "primitives");
+    
+    // Inicialização da parte de áudio.
+    must_init(al_install_audio(), "audio");
+    must_init(al_init_acodec_addon(), "audio codecs");
+    must_init(al_reserve_samples(16), "reserve samples");
 
-    // assinatura dos eventos
     al_register_event_source(queue, al_get_keyboard_event_source());
     al_register_event_source(queue, al_get_display_event_source(disp));
     al_register_event_source(queue, al_get_timer_event_source(timer));
-    al_register_event_source(queue, al_get_mouse_event_source()); 
 
     bool done = false;
     bool redraw = true;
     ALLEGRO_EVENT event;
-
-    float x, y;
-    x = 100;
-    y = 100;
-
-    // ALLEGRO_KEYBOARD_STATE ks; // estado do teclado
-    #define KEY_SEEN     1
-    #define KEY_RELEASED 2
-
-    // teclas possíveis de serem pressionadas
-    unsigned char key[ALLEGRO_KEY_MAX];
-    // memset zera o vetor key 
-    memset(key, 0, sizeof(key));
-
-    // esconde o cursor da tela 
-    al_hide_mouse_cursor(disp);
-
-    al_grab_mouse(disp);
 
     al_start_timer(timer);
     while(1)
@@ -72,27 +59,11 @@ int main()
         switch(event.type)
         {
             case ALLEGRO_EVENT_TIMER:
-                if(key[ALLEGRO_KEY_ESCAPE])
-                    done = true;
-
-                for(int i = 0; i < ALLEGRO_KEY_MAX; i++)
-                    key[i] &= KEY_SEEN;
-
+                // game logic goes here.
                 redraw = true;
                 break;
 
-            case ALLEGRO_EVENT_MOUSE_AXES:
-                x = event.mouse.x;
-                y = event.mouse.y;
-                break;
-
             case ALLEGRO_EVENT_KEY_DOWN:
-                key[event.keyboard.keycode] = KEY_SEEN | KEY_RELEASED;
-                break;
-            case ALLEGRO_EVENT_KEY_UP:
-                key[event.keyboard.keycode] &= KEY_RELEASED;
-                break;
-
             case ALLEGRO_EVENT_DISPLAY_CLOSE:
                 done = true;
                 break;
@@ -104,8 +75,8 @@ int main()
         if(redraw && al_is_event_queue_empty(queue))
         {
             al_clear_to_color(al_map_rgb(0, 0, 0));
-            al_draw_textf(font, al_map_rgb(255, 255, 255), 0, 0, 0, "X: %.1f Y: %.1f", x, y);
-            al_draw_filled_rectangle(x, y, x + 10, y + 10, al_map_rgb(255, 0, 0));
+            // Texto centralizado.
+            al_draw_text(font, al_map_rgb(255, 255, 255), 640/2, 480/2, ALLEGRO_ALIGN_CENTER, "Silence");
 
             al_flip_display();
 
