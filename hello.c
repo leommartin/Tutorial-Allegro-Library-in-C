@@ -47,7 +47,15 @@ int main()
     x = 100;
     y = 100;
 
-    ALLEGRO_KEYBOARD_STATE ks; // estado do teclado
+    // ALLEGRO_KEYBOARD_STATE ks; // estado do teclado
+
+    #define KEY_SEEN     1
+    #define KEY_RELEASED 2
+
+    // teclas possíveis de serem pressionadas
+    unsigned char key[ALLEGRO_KEY_MAX];
+    // memset zera o vetor key 
+    memset(key, 0, sizeof(key));
 
     al_start_timer(timer);
     while(1)
@@ -57,22 +65,31 @@ int main()
         switch(event.type)
         {
             case ALLEGRO_EVENT_TIMER:
-                al_get_keyboard_state(&ks);
-                if(al_key_down(&ks, ALLEGRO_KEY_UP))
+                if(key[ALLEGRO_KEY_UP])
                     y--;
-                if(al_key_down(&ks, ALLEGRO_KEY_DOWN))
+                if(key[ALLEGRO_KEY_DOWN])
                     y++;
-                if(al_key_down(&ks, ALLEGRO_KEY_LEFT))
+                if(key[ALLEGRO_KEY_LEFT])
                     x--;
-                if(al_key_down(&ks, ALLEGRO_KEY_RIGHT))
+                if(key[ALLEGRO_KEY_RIGHT])
                     x++;
 
-                if(al_key_down(&ks, ALLEGRO_KEY_ESCAPE))
+                if(key[ALLEGRO_KEY_ESCAPE])
                     done = true;
+
+                for(int i = 0; i < ALLEGRO_KEY_MAX; i++)
+                    key[i] &= KEY_SEEN;
+
                 redraw = true;
                 break;
 
-            // case ALLEGRO_EVENT_KEY_DOWN: // linha removida
+            case ALLEGRO_EVENT_KEY_DOWN:
+                key[event.keyboard.keycode] = KEY_SEEN | KEY_RELEASED;
+                break;
+            case ALLEGRO_EVENT_KEY_UP:
+                key[event.keyboard.keycode] &= KEY_RELEASED;
+                break;
+
             case ALLEGRO_EVENT_DISPLAY_CLOSE:
                 done = true;
                 break;
