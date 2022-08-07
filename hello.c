@@ -16,6 +16,7 @@ int main()
 {
     must_init(al_init(), "allegro");
     must_init(al_install_keyboard(), "keyboard");
+    must_init(al_install_mouse(), "mouse");
 
     ALLEGRO_TIMER* timer = al_create_timer(1.0 / 30.0);
     must_init(timer, "timer");
@@ -35,9 +36,11 @@ int main()
 
     must_init(al_init_primitives_addon(), "primitives");
 
+    // assinatura dos eventos
     al_register_event_source(queue, al_get_keyboard_event_source());
     al_register_event_source(queue, al_get_display_event_source(disp));
     al_register_event_source(queue, al_get_timer_event_source(timer));
+    al_register_event_source(queue, al_get_mouse_event_source()); 
 
     bool done = false;
     bool redraw = true;
@@ -48,7 +51,6 @@ int main()
     y = 100;
 
     // ALLEGRO_KEYBOARD_STATE ks; // estado do teclado
-
     #define KEY_SEEN     1
     #define KEY_RELEASED 2
 
@@ -56,6 +58,11 @@ int main()
     unsigned char key[ALLEGRO_KEY_MAX];
     // memset zera o vetor key 
     memset(key, 0, sizeof(key));
+
+    // esconde o cursor da tela 
+    al_hide_mouse_cursor(disp);
+
+    al_grab_mouse(disp);
 
     al_start_timer(timer);
     while(1)
@@ -65,15 +72,6 @@ int main()
         switch(event.type)
         {
             case ALLEGRO_EVENT_TIMER:
-                if(key[ALLEGRO_KEY_UP])
-                    y--;
-                if(key[ALLEGRO_KEY_DOWN])
-                    y++;
-                if(key[ALLEGRO_KEY_LEFT])
-                    x--;
-                if(key[ALLEGRO_KEY_RIGHT])
-                    x++;
-
                 if(key[ALLEGRO_KEY_ESCAPE])
                     done = true;
 
@@ -81,6 +79,11 @@ int main()
                     key[i] &= KEY_SEEN;
 
                 redraw = true;
+                break;
+
+            case ALLEGRO_EVENT_MOUSE_AXES:
+                x = event.mouse.x;
+                y = event.mouse.y;
                 break;
 
             case ALLEGRO_EVENT_KEY_DOWN:
